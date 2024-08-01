@@ -1,19 +1,41 @@
-package app
+package api
 
 import (
-	"lambda-func/api"
+	"fmt"
 	"lambda-func/database"
+	"lambda-func/types"
 )
 
-type App struct {
-	ApiHandler api.Handler
+type ApiHandler struct {
+	dbStore database.DynamoDbClient
 }
 
-func NewApp() App {
-	db := database.NewDynamoDbClient()
-	apiHandler := api.NewApiHandler(db)
-
-	return App{
-		ApiHandler: apiHandler,
+func NewApiHandler(dbStore database.DynamoDbClient) ApiHandler {
+	return ApiHandler{
+		dbStore: dbStore,
 	}
+}
+
+func (api ApiHandler) RegisterUserHandler(event types.RegisterUser) error {
+	if event.Username == "" || event.Password == "" {
+		return fmt.Errorf("request has empty parameters")
+	}
+
+	userExists, err := api.dbStore.DoesUserExist(event.Username)
+
+	if err != nil {
+		return fmt.Errorf("there is an error %w", err)
+	}
+
+	if userExists {
+		return fmt.Errorf("user already exists")
+	}
+
+	err = api.dbStore.InsertUser(event)
+
+	if err != nil {
+		return fmt.Errorf("error registering the user %w", event)
+	}
+
+	return nil
 }
