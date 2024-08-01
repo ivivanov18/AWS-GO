@@ -27,6 +27,7 @@ func NewDynamoDbClient() DynamoDbClient {
 
 func (client DynamoDbClient) DoesUserExist(username string) (bool, error) {
 	result, err := client.databaseStore.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(TABLE_NAME),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
