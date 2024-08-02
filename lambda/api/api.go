@@ -7,10 +7,10 @@ import (
 )
 
 type ApiHandler struct {
-	dbStore database.DynamoDbClient
+	dbStore database.UserStore
 }
 
-func NewApiHandler(dbStore database.DynamoDbClient) ApiHandler {
+func NewApiHandler(dbStore database.UserStore) ApiHandler {
 	return ApiHandler{
 		dbStore: dbStore,
 	}
