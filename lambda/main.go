@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"lambda-func/app"
@@ -15,19 +14,14 @@ type MyEvent struct {
 	Username string `json:"username"`
 }
 
-func HandleRequest(event MyEvent) (string, error) {
-	if event.Username == "" {
-		return "", fmt.Errorf("username cannot be empty")
-	}
-	return fmt.Sprintf("successfully called by - %s", event.Username), nil
-}
-
 func main() {
 	app := app.NewApp()
 	lambda.Start(func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 		switch request.Path {
 		case "/register":
 			return app.ApiHandler.RegisterUserHandler(request)
+		case "/login":
+			return app.ApiHandler.LoginUser(request)
 		default:
 			return events.APIGatewayProxyResponse{
 				Body:       "Not found",

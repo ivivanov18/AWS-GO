@@ -76,3 +76,42 @@ func (api ApiHandler) RegisterUserHandler(request events.APIGatewayProxyRequest)
 		StatusCode: http.StatusCreated,
 	}, nil
 }
+
+func (api ApiHandler) LoginUser(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	var loginUser types.LoginUser
+
+	err := json.Unmarshal([]byte(request.Body), &loginUser)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       "Invalid request",
+			StatusCode: http.StatusBadRequest,
+		}, err
+	}
+
+	if loginUser.Password == "" || loginUser.Username == "" {
+		return events.APIGatewayProxyResponse{
+			Body:       "request cannot be empty",
+			StatusCode: http.StatusBadRequest,
+		}, nil
+	}
+
+	user, err := api.dbStore.GetUser(loginUser.Username)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			Body:       "Internal Server error",
+			StatusCode: http.StatusInternalServerError,
+		}, err
+	}
+
+	if !types.ValidatePassword(user.PasswordHash, loginUser.Password) {
+		return events.APIGatewayProxyResponse{
+			Body:       "user or password is incorrect",
+			StatusCode: http.StatusBadRequest,
+		}, nil
+	}
+
+	return events.APIGatewayProxyResponse{
+		Body:       "Successfully logged in",
+		StatusCode: http.StatusOK,
+	}, nil
+}
