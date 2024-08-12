@@ -45,6 +45,7 @@ func NewAwsGoStack(scope constructs.Construct, id string, props *AwsGoStackProps
 		DeployOptions: &awsapigateway.StageOptions{
 			LoggingLevel: awsapigateway.MethodLoggingLevel_INFO,
 		},
+		CloudWatchRole: jsii.Bool(true),
 	})
 
 	integration := awsapigateway.NewLambdaIntegration(lambda, nil)
